@@ -8,8 +8,10 @@ public class Player2DMovement : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
 
     public float moveSpeed = 2.5f;
+    private float moveLimiter = 0.7f;
+    private float horizontal;
+    private float vertical;
     public Rigidbody2D rb;
-    Vector2 movement;
 
     void Start()
     {
@@ -19,72 +21,23 @@ public class Player2DMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (movement.x == 0 && movement.y == 0) //not moving
-        {
-            // _animator.SetBool("walking", false);
-            // if (FindObjectOfType<AudioManager>().isPlaying("Footsteps1") == true)
-            // {
-            //     FindObjectOfType<AudioManager>().Pause("Footsteps1");
-            // }
-        }
-        else
-        {
-            // _animator.SetBool("walking", true);
-            // if (FindObjectOfType<AudioManager>().isPlaying("Footsteps1") == false)
-            // {
-            //     FindObjectOfType<AudioManager>().Play("Footsteps1");
-            // }
-            if (movement.x == 0)
-            {
-                if (movement.y == -1) //DOWN: facing down and right
-                {
-                    movement.x = 1;
-                }
-                else if (movement.y == 1)
-                { //UP: facing up and left
-                    movement.x = -1;
-                }
-            }
-            if (movement.y == 0)
-            {
-                if (movement.x == 1) //RIGHT: facing right and up, FLIP
-                {
-                    movement.y = 1;
-                }
-                else if (movement.x == -1) //LEFT: facing left and down, FLIP
-                {
-                    movement.y = -1;
-                }
-            }
-
-            if (movement.x != movement.y) //default images are up + left and down + right
-            {
-                _spriteRenderer.flipX = false;
-            } else {
-                _spriteRenderer.flipX = true;
-            }
-            
-        }
-        updateDirection(movement.y);
+        // Gives a value between -1 and 1
+        horizontal = Input.GetAxisRaw("Horizontal"); // -1 is left
+        vertical = Input.GetAxisRaw("Vertical"); // -1 is down
     }
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + moveSpeed * movement * Time.deltaTime);
-    }
+        if (horizontal != 0 && vertical != 0) // Check for diagonal movement
+        {
+            // limit movement speed diagonally, so you move at 70% speed
+            horizontal *= moveLimiter;
+            vertical *= moveLimiter;
+        } 
 
-    void updateDirection(float y)
-    {
-        if (y == -1)
-        {
-            // _animator.SetBool("facingDown", true);
-        } else if (y == 1)
-        {
-            // _animator.SetBool("facingDown", false);
-        }
+        rb.velocity = new Vector2(horizontal * moveSpeed, vertical * moveSpeed);
     }
 }
 
